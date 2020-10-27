@@ -1,0 +1,69 @@
+---
+title: "Shiny Workshop"
+output:
+  distill::distill_article:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## What is Shiny?
+Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as [AWS](https://www.charlesbordet.com/en/guide-shiny-aws/#) to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML or JavaScript.
+
+Shiny applications have two defining elements a ui and server. The server is a function that interact with the ui in continuum as long as the application is running. This two fucntions are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter elements in the server. The basic flow of a Shiny application is as follows:
+
+```{r eval = F, echo = T}
+library(shiny)
+
+server <- function(input, output) {
+  # Some Code
+}
+
+ui <- fluidPage(
+  # Some Code 
+)
+
+shinyApp(ui, server)
+```
+
+NOTE: Sometimes you may have server include a "session," however, for our purposes today we will not use this element. Usually, Shiny Apps will require a session element when there is a lot of reactive elements in the application.
+
+```{r eval = F, echo = T}
+server <- function(input, output, session) {
+  # Some Code
+}
+```
+
+
+Some great resources:
+
+  - [RStudio Shiny Examples](https://shiny.rstudio.com/gallery/)
+  
+  - [Mastering Shiny by Hadley Wickham](https://mastering-shiny.org/)
+  
+  - [RStudio Shiny Tutorial](https://shiny.rstudio.com/tutorial/) 
+  
+  - [RStudio Shiny Artciles](https://shiny.rstudio.com/articles/)
+  
+  - [RStudio Shiny Community Page](https://community.rstudio.com/c/shiny/8?_ga=2.212813021.876891639.1603756418-718580365.1572380605)
+  
+  - [Shiny Cheatsheet](https://rstudio.com/resources/cheatsheets/)
+
+## Basic Example:
+
+## Slider: 
+
+## Graphs:
+
+## Dynamic Interface:
+
+## Reactive Programming:
+
+## Add A Map:
+
+[Code for Map](insert link)
+
+
