@@ -7,13 +7,6 @@ library(stringr)
 bballArenas <- read.csv("Data/CollegeBBallArenas.csv")
 
 server <- function(input, output) {
-  output$conference <- renderUI({
-    selectInput("conferenceInput",
-                "Select a Conference(s)",
-                choices = bballArenas$CONF,
-                selectize = TRUE,
-                multiple = TRUE)
-  })
   
   selectedConf <- reactive({
     req(input$conferenceInput)
@@ -51,10 +44,20 @@ server <- function(input, output) {
 }
 
 ui <- fluidPage(
-  tags$b(tags$h1("Locations of College Basketball Arenas")),
+  br(),
+  fluidRow(
+    column(9, 
+           tags$b(tags$h1("Locations of College Basketball Arenas"))),
+    column(3, 
+           tags$img(src = "ncaa-logo-Floor.jpg",
+                    height = 55))),
   sidebarLayout(
     sidebarPanel(
-      uiOutput("conference"),
+      selectInput("conferenceInput",
+                  "Select a Conference(s)",
+                  choices = bballArenas$CONF,
+                  selectize = TRUE,
+                  multiple = TRUE),
       actionButton("showMap",
                    "Show/Update Map",
                    class = "btn-primary"),

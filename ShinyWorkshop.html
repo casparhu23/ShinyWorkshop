@@ -1950,13 +1950,14 @@ distill-header .nav a {
 <li><a href="#graphs">Graphs:</a></li>
 <li><a href="#dynamic-interface">Dynamic Interface:</a></li>
 <li><a href="#reactive-programming">Reactive Programming:</a></li>
-<li><a href="#add-a-map">Add A Map:</a></li>
+<li><a href="#putting-all-together">Putting All Together:</a></li>
+<li><a href="#outside-resources">Outside Resources:</a></li>
 </ul>
 </nav>
 <hr class="d-toc-separator" />
 <h2 id="what-is-shiny">What is Shiny?</h2>
-<p>Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as <a href="https://www.charlesbordet.com/en/guide-shiny-aws/#">AWS</a> to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML or JavaScript.</p>
-<p>Shiny applications have two defining elements a ui and server. The server is a function that interact with the ui in continuum as long as the application is running. This two fucntions are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter elements in the server. The basic flow of a Shiny application is as follows:</p>
+<p>Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as <a href="https://www.charlesbordet.com/en/guide-shiny-aws/#">AWS</a> to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML, or JavaScript.</p>
+<p>Shiny applications have two defining elements a ui and server. The server is a function that interacts with the ui in continuum as long as the application is running. These two elements are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter the server’s elements. The basic flow of a Shiny application is as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(shiny)
@@ -1971,29 +1972,186 @@ ui &lt;- fluidPage(
 
 shinyApp(ui, server)</code></pre>
 </div>
-<p>NOTE: Sometimes you may have server include a “session,” however, for our purposes today we will not use this element. Usually, Shiny Apps will require a session element when there is a lot of reactive elements in the application.</p>
+<p>NOTE: Sometimes, you may need to include a “session” in the server function; however, for our purposes today, we will not use this element. Usually, Shiny Apps will require a session element when there are many reactive elements in the application.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 server &lt;- function(input, output, session) {
   # Some Code
 }</code></pre>
 </div>
-<p>Some great resources:</p>
-<ul>
-<li><p><a href="https://shiny.rstudio.com/gallery/">RStudio Shiny Examples</a></p></li>
-<li><p><a href="https://mastering-shiny.org/">Mastering Shiny by Hadley Wickham</a></p></li>
-<li><p><a href="https://shiny.rstudio.com/tutorial/">RStudio Shiny Tutorial</a></p></li>
-<li><p><a href="https://shiny.rstudio.com/articles/">RStudio Shiny Artciles</a></p></li>
-<li><p><a href="https://community.rstudio.com/c/shiny/8?_ga=2.212813021.876891639.1603756418-718580365.1572380605">RStudio Shiny Community Page</a></p></li>
-<li><p><a href="https://rstudio.com/resources/cheatsheets/">Shiny Cheatsheet</a></p></li>
-</ul>
 <h2 id="basic-example">Basic Example:</h2>
 <h2 id="slider">Slider:</h2>
 <h2 id="graphs">Graphs:</h2>
 <h2 id="dynamic-interface">Dynamic Interface:</h2>
 <h2 id="reactive-programming">Reactive Programming:</h2>
-<h2 id="add-a-map">Add A Map:</h2>
-<p><a href="insert%20link">Code for Map</a></p>
+<h2 id="putting-all-together">Putting All Together:</h2>
+<p>This example puts together elements that we talked about today, and the code for this example can be found <a href="https://github.com/jjenki22/ShinyWorkshop/blob/main/ShinyMapExample.R">here</a>. This code introduces a few very useful things. First, it uses the library DT, which outputs a data table, which can be used in rmarkdowns as well. The data table is created in the server and outputed in the UI. Second, it utilizes the leaflet package, which is an open-source map system.</p>
+<p>Server:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(shiny)
+library(leaflet)
+library(dplyr)
+library(DT)
+library(stringr)
+
+bballArenas &lt;- read.csv(&quot;Data/CollegeBBallArenas.csv&quot;)
+
+server &lt;- function(input, output) {
+  
+  # Filtering based on conferenceInput
+  selectedConf &lt;- reactive({
+    req(input$conferenceInput)
+    bballArenas %&gt;% 
+      filter(CONF == input$conferenceInput)
+  })
+  
+  # Outputting Data Table
+  output$teamsDT &lt;- DT::renderDataTable(DT::datatable({
+    selectedConf()
+    }))
+  
+  # Creating Map Data 
+  arena_data &lt;- reactive({
+    team_arena_data &lt;- selectedConf() %&gt;% 
+      mutate(popup = str_c(str_c(&quot;School: &quot;, Team, sep = &quot;&quot;),
+                           str_c(&quot;Arena: &quot;, Arena, sep = &quot;&quot;),
+                           str_c(&quot;City: &quot;, City, sep = &quot;&quot;),
+                           str_c(&quot;State: &quot;, State, sep = &quot;&quot;),
+                           str_c(&quot;Capacity: &quot;, Capacity, sep = &quot;&quot;),
+                           str_c(&quot;Conference: &quot;, CONF, sep = &quot;&quot;),
+                           sep = &quot;&lt;br/&gt;&quot;))
+    team_arena_data
+  })
+  
+  # Observing showMap Button Input
+  observeEvent(input$showMap, {
+    output$Conf_Map &lt;-renderLeaflet({
+        ncaa_map &lt;- leaflet(arena_data()) %&gt;% 
+          addProviderTiles(&quot;CartoDB.Positron&quot;)  %&gt;% 
+          setView(-98.35, 39.7,
+                  zoom = 4) %&gt;% 
+          addMarkers(~Longitude, ~Latitude,
+                     popup = ~popup)
+        ncaa_map  
+    }) 
+  })
+}</code></pre>
+</div>
+<p>Overview of server items:</p>
+<ul>
+<li><p>Filtering Based on conferenceInput</p>
+<ul>
+<li><p>req(input$conferenceInput) is used because it requires an input from conferenceInput for selectedConf to run</p></li>
+<li><p>This creates a new data frame that contains the selected conferences. Remember, everything in the server is a function. Anytime you refer to selectedConf, you have to use (), so it would look like selectedConf()</p></li>
+</ul></li>
+<li><p>output$teamsDT</p>
+<ul>
+<li><p>Takes the element selectedConf() and creates a dataatble</p></li>
+<li><p>Remember you have to use () when referring to selectedConf</p></li>
+</ul></li>
+<li><p>Creating Map Data</p>
+<ul>
+<li><p>Anytime you refer to an object defined within the server, you need to use the reactive function.</p></li>
+<li><p>Next, we used str_c from the stringr package to condense element-wise vectors into one character vector</p></li>
+<li><p>This will be used to create the popup for the leaflet map</p></li>
+</ul></li>
+<li><p>Observing showMap Button Input</p>
+<ul>
+<li><p>This utilizes the observeEvent function in shiny that, in this case, is reacts whenever a user presses the show map button (input$showMap)</p></li>
+<li><p>The addProviderTiles sets the background of the map. Leaflet has many options, and you can view other tiles (here)[<a href="https://leaflet-extras.github.io/leaflet-providers/preview/" class="uri">https://leaflet-extras.github.io/leaflet-providers/preview/</a>].</p></li>
+<li><p>Set view sets the geocoordinate view of the map. In this case, it is set to the center of the United States.</p></li>
+<li><p>AddMarkers adds the location of the arenas to the map and the popup functionality.</p></li>
+</ul></li>
+</ul>
+<p>UI:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ui &lt;- fluidPage(
+  # Break
+  br(),
+  # Use of FluidRow
+  fluidRow(
+    # Column set to 9
+    column(9, 
+           tags$b(tags$h1(&quot;Locations of College Basketball Arenas&quot;))),
+    # Column set to 3 
+    column(3, 
+           tags$img(src = &quot;ncaa-logo-Floor.jpg&quot;,
+                    height = 55))),
+  # Sidebar layout
+  sidebarLayout(
+    # Sidebar Pannel
+    sidebarPanel(
+      # Input for conference
+      selectInput(&quot;conferenceInput&quot;, # ID
+                  &quot;Select a Conference(s)&quot;, # Label
+                  choices = bballArenas$CONF, # Choices
+                  selectize = TRUE, # Whether Selectize
+                  multiple = TRUE), # Allows multiple selections
+      # Action Button
+      actionButton(&quot;showMap&quot;, # ID
+                   &quot;Show/Update Map&quot;, # Label
+                   class = &quot;btn-primary&quot;), # Class of the Button
+      # Radio Button
+      radioButtons(&quot;displayTable&quot;, # ID
+                   &quot;Do you want to display a table?&quot;, # Label
+                   c(&quot;Yes&quot; = TRUE, &quot;No&quot; = FALSE), # Options
+                   inline = TRUE, # Whether the choices appear on one line
+                   selected = FALSE)), # Selection before user touches the button
+    # Main Pannel
+    mainPanel(
+      # Map Output
+      leafletOutput(&quot;Conf_Map&quot;), # Outputs the leaflet map defined in the server
+      # Break in line
+      br(),
+      # Conditional Pannel
+      conditionalPanel(condition = &quot;input.displayTable == 'TRUE'&quot;, # Appears if input$displaytable == TRUE
+                       # Date Table 
+                       DT::dataTableOutput(&quot;teamsDT&quot;)) # Data table output when input$displaytable == TRUE 
+    )))
+
+shinyApp(ui, server)</code></pre>
+</div>
+<p>Overview of ui items:</p>
+<ul>
+<li><p>Use of fluidRow and columns</p>
+<ul>
+<li><p>This created a row in the UI, and the column creates the spacing between the text and the picture</p></li>
+<li><p>The text is created by using tags$h1, which stands for header size 1</p></li>
+<li><p>tags$b makes the text bold</p></li>
+<li><p>The NCAA picture is added by using tags$img and directing the source to the image. You must create a www folder within the project and place all pictures in this folder. Otherwise, the shiny application will not be able to find the image.</p></li>
+</ul></li>
+<li><p>SidebarPanel</p>
+<ul>
+<li>Is extremely useful and relies on two elements sidebarPanel (the shaded area) and mainPanel (where the map and table appear)</li>
+</ul></li>
+<li><p>selectInput</p>
+<ul>
+<li>Creates the dropdown with the conferences</li>
+</ul></li>
+<li><p>actionButton</p>
+<ul>
+<li>Creates the button that users can interact with</li>
+</ul></li>
+<li><p>radioButton</p>
+<ul>
+<li>Used to create option user can select</li>
+</ul></li>
+<li><p>conditionalPanel</p>
+<ul>
+<li>Only appears when the preset condition is met</li>
+</ul></li>
+</ul>
+<h2 id="outside-resources">Outside Resources:</h2>
+<ul>
+<li><p><a href="https://shiny.rstudio.com/gallery/">RStudio Shiny Examples</a></p></li>
+<li><p><a href="https://mastering-shiny.org/">Mastering Shiny by Hadley Wickham</a></p></li>
+<li><p><a href="https://shiny.rstudio.com/tutorial/">RStudio Shiny Tutorial</a></p></li>
+<li><p><a href="https://shiny.rstudio.com/articles/">RStudio Shiny Articles</a></p></li>
+<li><p><a href="https://community.rstudio.com/c/shiny/8?_ga=2.212813021.876891639.1603756418-718580365.1572380605">RStudio Shiny Community Page</a></p></li>
+<li><p><a href="https://rstudio.com/resources/cheatsheets/">Shiny Cheatsheet</a></p></li>
+</ul>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
