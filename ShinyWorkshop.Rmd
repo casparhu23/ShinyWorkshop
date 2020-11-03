@@ -39,7 +39,129 @@ server <- function(input, output, session) {
 
 ## Basic Example:
 
-## Slider: 
+So what if we wanted details on the game times and locations of the Notre Dame schedule. I created a data frame with the falling information about the Notre Dame 2020 football schedule.
+
+```{r eval = T, echo = F}
+library(data.table)
+
+schedule <- read.csv("Data/NDSchedule.csv")
+
+DT::datatable(schedule,
+              options = list(pageLength = 11))
+```
+
+Now let's create a shiny app that makes a sentence such as "Notre Dame will play Syracuse on 12/5/20 at 2:30 in Notre Dame, IN."
+
+```{r eval = F, echo = T}
+schedule <- read.csv("Data/NDSchedule.csv")
+
+ui <- fluidPage(
+  br(),
+  column(5,
+         selectInput("teamSelected",
+                     "Select an Opponent:",
+                     choices = schedule$Opponent)),
+  column(7,
+         textOutput("text"))
+)
+
+server <- function(input, output) {
+  
+  output$text <- renderText({
+    selectedGame <- schedule %>% 
+      filter(Opponent == input$teamSelected)
+    paste("Notre Dame will play ",
+          selectedGame$Opponent,
+          " on ",
+          as.character(selectedGame$Date),
+          " at ",
+          as.character(selectedGame$GameTime),
+          " in ",
+          as.character(selectedGame$Location),
+          ".",
+          sep = "")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+So what is going on here? First, we read in the data file titled NDSchedule and then set the column to 5 in the fluidpage. In shiny, each page you create has 12 columns, which you can use as you wish. In addition, you can have as many rows as you want. We used the function selectInput to create a drop-down based on the opponents in the NDSchedule.csv data file. Next, we made another column, this time with a width of 7, and used textOutput to output the text created in the server. So what is going on in the server?
+
+Well, first, remember the server and UI are continually interacting with each other. Thus, when you select a different opponent in the UI, the inputs are changed, and the server output updates. We used the function renderText to create the text and used the dplyr option "filter" to select the opponent the user selected. From here, we used paste to create the sentence. If the user changes their input to something else, the process starts all over again, and output$text updates accordingly. You can download/view the code for the basic example [here](https://github.com/jjenki22/ShinyWorkshop/blob/main/ShinyBasicExample.R)
+
+## Some Useful UI Elements: 
+
+Here, we look at some basic UI elements in Shiny. This list is by no means exhaustive. There are MANY elements and a simple search on google and stack overflow can lead to discovering others.
+
+```{r eval = F, echo=T}
+server <- function(input, output) {
+  
+}
+
+ui <- fluidPage(
+  br(),
+  fluidRow(
+    column(4, 
+           tags$h4("Check Box"),
+           br(),
+           checkboxGroupInput("checkboxGroupID",
+                              "I'm a checkboxGroupInput",
+                              c("MSA", 
+                                "MSM",
+                                "MSBA",
+                                "MBA"),
+                              inline = TRUE),
+           br(),
+           checkboxInput("checkboxInputID",
+                         "I'm a checkboxInput")),
+    column(4,
+           tags$h4("Radio Buttons, selectInput, and SliderInput"),
+           br(),
+           radioButtons("radioButtonID",
+                        "I'm a radioButton",
+                        c("MSA",
+                          "MSM",
+                          "MSBA",
+                          "MBA"),
+                        select = "MBA",
+                        inline = FALSE),
+           br(),
+           selectInput("selectInputID",
+                       "I'm a selectInput",
+                       c("MSA",
+                         "MSM",
+                         "MSBA",
+                         "MBA"),
+                       multiple = FALSE),
+           br(),
+           sliderInput("sliderInputID",
+                       "I'm a sliderInput",
+                       min = 0,
+                       max = 100,
+                       value = 50,
+                       step = 5)),
+    column(4,
+           tags$h4("Numeric Input, Text Input, DateRange Input, and DateInput"),
+           br(),
+           numericInput("numericInputID",
+                        "I'm a numericInput",
+                        value = 10),
+           br(),
+           textInput("textInputID",
+                     "I'm a textInput",
+                     "enter text"),
+           br(),
+           dateRangeInput("dateRangeInputID",
+                          "I'm a date range"),
+           br(),
+           dateInput("dateInputID",
+                     "I'm a date input")
+  )
+))
+
+shinyApp(ui, server)
+```
 
 ## Graphs:
 
