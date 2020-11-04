@@ -86,11 +86,13 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
+![](Images/BasicExample.png)
+
 So what is going on here? First, we read in the data file titled NDSchedule and then set the column to 5 in the fluidpage. In shiny, each page you create has 12 columns, which you can use as you wish. In addition, you can have as many rows as you want. We used the function selectInput to create a drop-down based on the opponents in the NDSchedule.csv data file. Next, we made another column, this time with a width of 7, and used textOutput to output the text created in the server. So what is going on in the server?
 
 Well, first, remember the server and UI are continually interacting with each other. Thus, when you select a different opponent in the UI, the inputs are changed, and the server output updates. We used the function renderText to create the text and used the dplyr option "filter" to select the opponent the user selected. From here, we used paste to create the sentence. If the user changes their input to something else, the process starts all over again, and output$text updates accordingly. You can download/view the code for the basic example [here](https://github.com/jjenki22/ShinyWorkshop/blob/main/ShinyBasicExample.R)
 
-## Some Useful UI Elements: 
+## UI Elements: 
 
 Here, we look at some basic UI elements in Shiny. This list is by no means exhaustive. There are MANY elements and a simple search on google and stack overflow can lead to discovering others.
 
@@ -163,6 +165,52 @@ ui <- fluidPage(
 shinyApp(ui, server)
 ```
 
+![](Images/UIElements.png)
+
+Very cool stuff! But what if we wanted to create a UI element in the server? We can do that! Let's go back to our Notre Dame football example above, however, this time, we will render the select input in the server. 
+
+```{r eval = F, echo = T}
+schedule <- read.csv("Data/NDSchedule.csv")
+
+server <- function(input, output) {
+  output$TeamSelectedUIOutput <- renderUI({
+    selectInput("teamSelected",
+                "Select an Opponent:",
+                choices = schedule$Opponent)
+  })
+  
+  output$text <- renderText({
+    req(input$teamSelected)
+    selectedGame <- schedule %>% 
+      filter(Opponent == input$teamSelected)
+    paste("Notre Dame will play ",
+          selectedGame$Opponent,
+          " on ",
+          as.character(selectedGame$Date),
+          " at ",
+          as.character(selectedGame$GameTime),
+          " in ",
+          as.character(selectedGame$Location),
+          ".",
+          sep = "")
+  })
+}
+
+ui <- fluidPage(
+  br(),
+  column(5,
+         uiOutput("TeamSelectedUIOutput")),
+  column(7,
+         textOutput("text"))
+)
+
+shinyApp(ui, server)
+```
+
+![](Images/renderUIExample.png)
+
+We do everything we did last time, except this time we created the UI element in the server. We use renderUI in the server and assign it to output$UIOutput. We still need to create an ID for selectInput, which we set to "teamSelected." Also, we required that there is an input for team selected in order to create our text. Later, in the UI we use uiOutput and reference "TeamSelectedUIOutput" to output the UI element we created in the server. 
+
 ## Graphs:
 
 ## Dynamic Interface:
@@ -224,43 +272,7 @@ server <- function(input, output) {
     }) 
   })
 }
-```
 
-Overview of server items:
-  
-  - Filtering Based on conferenceInput
-    
-    -  req(input$conferenceInput) is used because it requires an input from conferenceInput for selectedConf to run
-    
-    - This creates a new data frame that contains the selected conferences. Remember, everything in the server is a function. Anytime you refer to selectedConf, you have to use (), so it would look like selectedConf()
-
-  - output$teamsDT
-    
-    - Takes the element selectedConf() and creates a dataatble 
-    
-    - Remember you have to use () when referring to selectedConf
-  
-  - Creating Map Data 
-    
-    - Anytime you refer to an object defined within the server, you need to use the reactive function. 
-    
-    - Next, we used str_c from the stringr package to condense element-wise vectors into one character vector
-    
-    - This will be used to create the popup for the leaflet map
-    
-  - Observing showMap Button Input
-  
-    - This utilizes the observeEvent function in shiny that, in this case, is reacts whenever a user presses the show map button (input$showMap)
-    
-    - The addProviderTiles sets the background of the map. Leaflet has many options, and you can view other tiles (here)[https://leaflet-extras.github.io/leaflet-providers/preview/].
-    
-    - Set view sets the geocoordinate view of the map. In this case, it is set to the center of the United States. 
-    
-    - AddMarkers adds the location of the arenas to the map and the popup functionality.
-  
-UI:
-
-```{r eval = F, echo = T}
 ui <- fluidPage(
   # Break
   br(),
@@ -307,6 +319,42 @@ ui <- fluidPage(
 
 shinyApp(ui, server)
 ```
+
+![](Images/MapExample.png)
+
+Overview of server items:
+  
+  - Filtering Based on conferenceInput
+    
+    -  req(input$conferenceInput) is used because it requires an input from conferenceInput for selectedConf to run
+    
+    - This creates a new data frame that contains the selected conferences. Remember, everything in the server is a function. Anytime you refer to selectedConf, you have to use (), so it would look like selectedConf()
+
+  - output$teamsDT
+    
+    - Takes the element selectedConf() and creates a dataatble 
+    
+    - Remember you have to use () when referring to selectedConf
+  
+  - Creating Map Data 
+    
+    - Anytime you refer to an object defined within the server, you need to use the reactive function. 
+    
+    - Next, we used str_c from the stringr package to condense element-wise vectors into one character vector
+    
+    - This will be used to create the popup for the leaflet map
+    
+  - Observing showMap Button Input
+  
+    - This utilizes the observeEvent function in shiny that, in this case, is reacts whenever a user presses the show map button (input$showMap)
+    
+    - The addProviderTiles sets the background of the map. Leaflet has many options, and you can view other tiles [here](https://leaflet-extras.github.io/leaflet-providers/preview/.
+    
+    - Set view sets the geocoordinate view of the map. In this case, it is set to the center of the United States. 
+    
+    - AddMarkers adds the location of the arenas to the map and the popup functionality.
+  
+UI:
 
 Overview of ui items:
 
