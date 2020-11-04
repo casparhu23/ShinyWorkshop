@@ -1,7 +1,7 @@
 library(shiny)
 library(dplyr)
 
-schedule <- read.csv("Data/NDSchedule.csv")
+schedule <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv")
 
 ui <- fluidPage(
   br(),

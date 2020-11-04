@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ## What is Shiny?
+
 Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as [AWS](https://www.charlesbordet.com/en/guide-shiny-aws/#) to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML, or JavaScript.
 
 Shiny applications have two defining elements a ui and server. The server is a function that interacts with the ui in continuum as long as the application is running. These two elements are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter the server's elements. The basic flow of a Shiny application is as follows:
@@ -44,7 +45,7 @@ So what if we wanted details on the game times and locations of the Notre Dame s
 ```{r eval = T, echo = F}
 library(data.table)
 
-schedule <- read.csv("Data/NDSchedule.csv")
+schedule <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv")
 
 DT::datatable(schedule,
               options = list(pageLength = 11))
@@ -53,7 +54,7 @@ DT::datatable(schedule,
 Now let's create a shiny app that makes a sentence such as "Notre Dame will play Syracuse on 12/5/20 at 2:30 in Notre Dame, IN."
 
 ```{r eval = F, echo = T}
-schedule <- read.csv("Data/NDSchedule.csv")
+schedule <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv")
 
 ui <- fluidPage(
   br(),
@@ -170,7 +171,7 @@ shinyApp(ui, server)
 Very cool stuff! But what if we wanted to create a UI element in the server? We can do that! Let's go back to our Notre Dame football example above, however, this time, we will render the select input in the server. 
 
 ```{r eval = F, echo = T}
-schedule <- read.csv("Data/NDSchedule.csv")
+schedule <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv")
 
 server <- function(input, output) {
   output$TeamSelectedUIOutput <- renderUI({
@@ -213,6 +214,43 @@ We do everything we did last time, except this time we created the UI element in
 
 ## Graphs:
 
+We can also create ggplots in shiny. Using the diamonds data frame from ggplot we can create the following.
+
+```{r eval = F, echo = T}
+server <- function(input, output){
+  
+  diamondsFiltered <- reactive({
+    diamonds %>% 
+      filter(carat >= input$Carets[1] & carat <= input$Carets[2])
+  })
+  
+  output$diamondsBar <- renderPlot({
+    ggplot(data=diamondsFiltered(), aes(x=cut)) +
+      geom_bar(fill="steelblue") +
+      theme_classic() + labs( x = "Cut", 
+                              y = "Count")
+  })
+  
+}
+
+ui <- fluidPage(
+  br(),
+  sliderInput("Carets",
+              "Number of Carets in the Diamonds:",
+              min = 0.3,
+              max = max(diamonds$carat),
+              value = c(1, 3),
+              step = .1),
+  plotOutput("diamondsBar")
+)
+
+shinyApp(ui, server)
+```
+
+![](Images/ggplotExample.png)
+
+So whats is going on above? First, we created a two-way slider, which we reference by calling either input$Carets[1] or [2] depending on which part of the slider we want to reference. Now, we turn to the server. First, we created the object diamondsFiltered, which is reactive based on the slider's inputs and filters the data frame based on the criteria that the user set. Next, we used renderPlot to create the reactive ggplot. One thing to note is that we set the data in ggplot equal to diamondsFiltered(). This is extremely important anytime we reference a reactive data frame created in the server. If we typed diamondsFiltered, the object would have sent an error. You must add () to the end of any reactive data frame.
+
 ## Dynamic Interface:
 
 ## Reactive Programming:
@@ -230,7 +268,7 @@ library(dplyr)
 library(DT)
 library(stringr)
 
-bballArenas <- read.csv("Data/CollegeBBallArenas.csv")
+bballArenas <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/CollegeBBallArenas.csv")
 
 server <- function(input, output) {
   

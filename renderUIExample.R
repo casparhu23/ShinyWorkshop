@@ -1,6 +1,6 @@
 library(shiny)
 
-schedule <- read.csv("Data/NDSchedule.csv")
+schedule <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv")
 
 server <- function(input, output) {
   output$TeamSelectedUIOutput <- renderUI({

@@ -4,7 +4,7 @@ library(dplyr)
 library(DT)
 library(stringr)
 
-bballArenas <- read.csv("Data/CollegeBBallArenas.csv")
+bballArenas <- read.csv("https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/CollegeBBallArenas.csv")
 
 server <- function(input, output) {
   
