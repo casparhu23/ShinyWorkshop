@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Shiny Workshop</title>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="section-header">
+
+
+
+<h1 class="title toc-ignore">Shiny Workshop</h1>
+
+</div>
+
+
+<div id="section-what-is-shiny" class="section level2">
+<h2>What is Shiny?</h2>
+<p>Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as <a href="https://www.charlesbordet.com/en/guide-shiny-aws/#">AWS</a> to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML, or JavaScript.</p>
+<div id="section-hosting-on-shinyapps.io" class="section level3">
+<h3>Hosting on shinyapps.io</h3>
+<ol style="list-style-type: decimal">
+<li><p>Start by going to <a href="https://www.shinyapps.io/admin/#/login">shinyapp.io</a> and create an account.</p></li>
+<li><p>After you get your account up and running, you will need to get your token and secret (isn’t as cool as it sounds). Click on your username and then “Tokens”. After you add a token, you should have some code that looks like this:</p></li>
+</ol>
+<pre class="r"><code>rsconnect::setAccountInfo(name=&#39;saberry&#39;,
+              token=&#39;78E99845F537740BAC221F1A2E7&#39;,
+              secret=&#39;pV/eAxst5Jflx03d74VsSAriz/EMuVk&#39;)</code></pre>
+<p>Naturally, you will need to install the <code>rsconnect</code> package before running the line above.</p>
+<p>After that, you can copy our <code>shinyPrediction</code> folder and then pass this along:</p>
+<pre class="r"><code>rsconnect::deployApp(&quot;~/path/to/shinyPrediction/&quot;)</code></pre>
+</div>
+<div id="section-what-makes-a-shiny-app" class="section level3">
+<h3>What Makes a Shiny App</h3>
+<p>Shiny applications have two defining elements: a ui and server. The server is a function that interacts with the ui in continuum as long as the application is running. These two elements are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter the server’s elements. The basic flow of a Shiny application is as follows:</p>
+<pre class="r"><code>library(shiny)
+
+server &lt;- function(input, output) {
+  # Some Code
+}
+
+ui &lt;- fluidPage(
+  # Some Code 
+)
+
+shinyApp(ui, server)</code></pre>
+<p>NOTE: Sometimes, you may need to include a “session” in the server function; however, for our purposes today, we will not use this element. Usually, Shiny Apps will require a session element when there are many reactive elements in the application.</p>
+<pre class="r"><code>server &lt;- function(input, output, session) {
+  # Some Code
+}</code></pre>
+</div>
+</div>
+<div id="section-basic-example" class="section level2">
+<h2>Basic Example:</h2>
+<p>So what if we wanted details on the game times and locations of the Notre Dame schedule. I created a data frame with the falling information about the Notre Dame 2020 football schedule.</p>
+<div id="htmlwidget-9153c12690b61ed09782" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9153c12690b61ed09782">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11"],["9/12/20","9/19/20","10/10/20","10/17/20","10/24/20","10/31/20","11/7/20","11/14/20","11/27/20","12/5/20","12/12/20"],["Duke","South Florida","Florida State","Louisville","Pittsburgh","Georgia Tech","Clemson","Boston College","North Carolina","Syracuse","Wake Forest"],["2:30","2:30","7:30","2:30","3:30","3:30","7:30","TBA","TBA","2:30","TBA"],["Notre Dame, IN","Notre Dame, IN","Notre Dame, IN","Notre Dame, IN","Pittsburgh, PA","Atlanta, GA","Notre Dame, IN","Chestnut Hill, MA","Chapel Hill, NC","Notre Dame, IN","Winston-Salem, NC"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Date<\/th>\n      <th>Opponent<\/th>\n      <th>GameTime<\/th>\n      <th>Location<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":11,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[10,11,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<p>Now let’s create a shiny app that makes a sentence such as “Notre Dame will play Syracuse on 12/5/20 at 2:30 in Notre Dame, IN.”</p>
+<pre class="r"><code>schedule &lt;- read.csv(&quot;https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv&quot;)
+
+ui &lt;- fluidPage(
+  br(),
+  column(5,
+         selectInput(&quot;teamSelected&quot;,
+                     &quot;Select an Opponent:&quot;,
+                     choices = schedule$Opponent)),
+  column(7,
+         textOutput(&quot;text&quot;))
+)
+
+server &lt;- function(input, output) {
+  
+  output$text &lt;- renderText({
+    selectedGame &lt;- schedule %&gt;% 
+      filter(Opponent == input$teamSelected)
+    paste(&quot;Notre Dame will play &quot;,
+          selectedGame$Opponent,
+          &quot; on &quot;,
+          as.character(selectedGame$Date),
+          &quot; at &quot;,
+          as.character(selectedGame$GameTime),
+          &quot; in &quot;,
+          as.character(selectedGame$Location),
+          &quot;.&quot;,
+          sep = &quot;&quot;)
+  })
+}
+
+shinyApp(ui, server)</code></pre>
+<div class="row">
+<div class="col-sm-5">
+<div class="form-group shiny-input-container">
+<label class="control-label" for="teamSelected">Select an Opponent:</label>
+<div>
+<select id="teamSelected"><option value="Duke" selected>Duke</option>
+<option value="South Florida">South Florida</option>
+<option value="Florida State">Florida State</option>
+<option value="Louisville">Louisville</option>
+<option value="Pittsburgh">Pittsburgh</option>
+<option value="Georgia Tech">Georgia Tech</option>
+<option value="Clemson">Clemson</option>
+<option value="Boston College">Boston College</option>
+<option value="North Carolina">North Carolina</option>
+<option value="Syracuse">Syracuse</option>
+<option value="Wake Forest">Wake Forest</option></select>
+<script type="application/json" data-for="teamSelected" data-nonempty="">{}</script>
+</div>
+</div>
+</div>
+<div class="col-sm-7">
+<div id="text" class="shiny-text-output"></div>
+</div>
+</div>
+<p>So what is going on here? First, we read in the data file titled NDSchedule and then set the column to 5 in the fluidpage. In shiny, each page you create has 12 columns, which you can use as you wish. In addition, you can have as many rows as you want. We used the function selectInput to create a drop-down based on the opponents in the NDSchedule.csv data file. Next, we made another column, this time with a width of 7, and used textOutput to output the text created in the server. So what is going on in the server?</p>
+<p>Well, first, remember the server and UI are continually interacting with each other. Thus, when you select a different opponent in the UI, the inputs are changed, and the server output updates. We used the function renderText to create the text and used the dplyr option “filter” to select the opponent the user selected. From here, we used paste to create the sentence. If the user changes their input to something else, the process starts all over again, and output$text updates accordingly. You can download/view the code for the basic example <a href="https://github.com/jjenki22/ShinyWorkshop/blob/main/ShinyBasicExample.R">here</a></p>
+</div>
+<div id="section-ui-elements" class="section level2">
+<h2>UI Elements:</h2>
+<p>Here, we look at some basic UI elements in Shiny. This list is by no means exhaustive. There are MANY elements and a simple search on google and stack overflow can lead to discovering others.</p>
+<pre class="r"><code>server &lt;- function(input, output) {
+  
+}
+
+ui &lt;- fluidPage(
+  br(),
+  fluidRow(
+    column(4, 
+           tags$h4(&quot;Check Box&quot;),
+           br(),
+           checkboxGroupInput(&quot;checkboxGroupID&quot;,
+                              &quot;I&#39;m a checkboxGroupInput&quot;,
+                              c(&quot;MSA&quot;, 
+                                &quot;MSM&quot;,
+                                &quot;MSBA&quot;,
+                                &quot;MBA&quot;),
+                              inline = TRUE),
+           br(),
+           checkboxInput(&quot;checkboxInputID&quot;,
+                         &quot;I&#39;m a checkboxInput&quot;)),
+    column(4,
+           tags$h4(&quot;Radio Buttons, selectInput, and SliderInput&quot;),
+           br(),
+           radioButtons(&quot;radioButtonID&quot;,
+                        &quot;I&#39;m a radioButton&quot;,
+                        c(&quot;MSA&quot;,
+                          &quot;MSM&quot;,
+                          &quot;MSBA&quot;,
+                          &quot;MBA&quot;),
+                        select = &quot;MBA&quot;,
+                        inline = FALSE),
+           br(),
+           selectInput(&quot;selectInputID&quot;,
+                       &quot;I&#39;m a selectInput&quot;,
+                       c(&quot;MSA&quot;,
+                         &quot;MSM&quot;,
+                         &quot;MSBA&quot;,
+                         &quot;MBA&quot;),
+                       multiple = FALSE),
+           br(),
+           sliderInput(&quot;sliderInputID&quot;,
+                       &quot;I&#39;m a sliderInput&quot;,
+                       min = 0,
+                       max = 100,
+                       value = 50,
+                       step = 5)),
+    column(4,
+           tags$h4(&quot;Numeric Input, Text Input, DateRange Input, and DateInput&quot;),
+           br(),
+           numericInput(&quot;numericInputID&quot;,
+                        &quot;I&#39;m a numericInput&quot;,
+                        value = 10),
+           br(),
+           textInput(&quot;textInputID&quot;,
+                     &quot;I&#39;m a textInput&quot;,
+                     &quot;enter text&quot;),
+           br(),
+           dateRangeInput(&quot;dateRangeInputID&quot;,
+                          &quot;I&#39;m a date range&quot;),
+           br(),
+           dateInput(&quot;dateInputID&quot;,
+                     &quot;I&#39;m a date input&quot;)
+)))
+
+shinyApp(ui, server)</code></pre>
+<div class="row">
+<div class="col-sm-4">
+<h4>Check Box</h4>
+<br/>
+<div id="checkboxGroupID" class="form-group shiny-input-checkboxgroup shiny-input-container shiny-input-container-inline">
+<label class="control-label" for="checkboxGroupID">I'm a checkboxGroupInput</label>
+<div class="shiny-options-group">
+<label class="checkbox-inline">
+<input type="checkbox" name="checkboxGroupID" value="MSA"/>
+<span>MSA</span>
+</label>
+<label class="checkbox-inline">
+<input type="checkbox" name="checkboxGroupID" value="MSM"/>
+<span>MSM</span>
+</label>
+<label class="checkbox-inline">
+<input type="checkbox" name="checkboxGroupID" value="MSBA"/>
+<span>MSBA</span>
+</label>
+<label class="checkbox-inline">
+<input type="checkbox" name="checkboxGroupID" value="MBA"/>
+<span>MBA</span>
+</label>
+</div>
+</div>
+<br/>
+<div class="form-group shiny-input-container">
+<div class="checkbox">
+<label>
+<input id="checkboxInputID" type="checkbox"/>
+<span>I'm a checkboxInput</span>
+</label>
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<h4>Radio Buttons, selectInput, and SliderInput</h4>
+<br/>
+<div id="radioButtonID" class="form-group shiny-input-radiogroup shiny-input-container">
+<label class="control-label" for="radioButtonID">I'm a radioButton</label>
+<div class="shiny-options-group">
+<div class="radio">
+<label>
+<input type="radio" name="radioButtonID" value="MSA"/>
+<span>MSA</span>
+</label>
+</div>
+<div class="radio">
+<label>
+<input type="radio" name="radioButtonID" value="MSM"/>
+<span>MSM</span>
+</label>
+</div>
+<div class="radio">
+<label>
+<input type="radio" name="radioButtonID" value="MSBA"/>
+<span>MSBA</span>
+</label>
+</div>
+<div class="radio">
+<label>
+<input type="radio" name="radioButtonID" value="MBA" checked="checked"/>
+<span>MBA</span>
+</label>
+</div>
+</div>
+</div>
+<br/>
+<div class="form-group shiny-input-container">
+<label class="control-label" for="selectInputID">I'm a selectInput</label>
+<div>
+<select id="selectInputID"><option value="MSA" selected>MSA</option>
+<option value="MSM">MSM</option>
+<option value="MSBA">MSBA</option>
+<option value="MBA">MBA</option></select>
+<script type="application/json" data-for="selectInputID" data-nonempty="">{}</script>
+</div>
+</div>
+<br/>
+<div class="form-group shiny-input-container">
+<label class="control-label" for="sliderInputID">I'm a sliderInput</label>
+<input class="js-range-slider" id="sliderInputID" data-min="0" data-max="100" data-from="50" data-step="5" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+</div>
+<div class="col-sm-4">
+<h4>Numeric Input, Text Input, DateRange Input, and DateInput</h4>
+<br/>
+<div class="form-group shiny-input-container">
+<label for="numericInputID">I'm a numericInput</label>
+<input id="numericInputID" type="number" class="form-control" value="10"/>
+</div>
+<br/>
+<div class="form-group shiny-input-container">
+<label for="textInputID">I'm a textInput</label>
+<input id="textInputID" type="text" class="form-control" value="enter text"/>
+</div>
+<br/>
+<div id="dateRangeInputID" class="shiny-date-range-input form-group shiny-input-container">
+<label class="control-label" for="dateRangeInputID">I'm a date range</label>
+<div class="input-daterange input-group">
+<input class="input-sm form-control" type="text" data-date-language="en" data-date-week-start="0" data-date-format="yyyy-mm-dd" data-date-start-view="month" data-date-autoclose="true"/>
+<span class="input-group-addon"> to </span>
+<input class="input-sm form-control" type="text" data-date-language="en" data-date-week-start="0" data-date-format="yyyy-mm-dd" data-date-start-view="month" data-date-autoclose="true"/>
+</div>
+</div>
+<br/>
+<div id="dateInputID" class="shiny-date-input form-group shiny-input-container">
+<label class="control-label" for="dateInputID">I'm a date input</label>
+<input type="text" class="form-control" data-date-language="en" data-date-week-start="0" data-date-format="yyyy-mm-dd" data-date-start-view="month" data-date-autoclose="true" data-date-dates-disabled="null" data-date-days-of-week-disabled="null"/>
+</div>
+</div>
+</div>
+<p>Very cool stuff! But what if we wanted to create a UI element in the server? We can do that! Let’s go back to our Notre Dame football example above, however, this time, we will render the select input in the server.</p>
+<pre class="r"><code>schedule &lt;- read.csv(&quot;https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/NDSchedule.csv&quot;)
+
+server &lt;- function(input, output) {
+  output$TeamSelectedUIOutput &lt;- renderUI({
+    selectInput(&quot;teamSelected&quot;,
+                &quot;Select an Opponent:&quot;,
+                choices = schedule$Opponent)
+  })
+  
+  output$text &lt;- renderText({
+    req(input$teamSelected)
+    selectedGame &lt;- schedule %&gt;% 
+      filter(Opponent == input$teamSelected)
+    paste(&quot;Notre Dame will play &quot;,
+          selectedGame$Opponent,
+          &quot; on &quot;,
+          as.character(selectedGame$Date),
+          &quot; at &quot;,
+          as.character(selectedGame$GameTime),
+          &quot; in &quot;,
+          as.character(selectedGame$Location),
+          &quot;.&quot;,
+          sep = &quot;&quot;)
+  })
+}
+
+ui &lt;- fluidPage(
+  br(),
+  column(5,
+         uiOutput(&quot;TeamSelectedUIOutput&quot;)),
+  column(7,
+         textOutput(&quot;text&quot;))
+)
+
+shinyApp(ui, server)</code></pre>
+<div class="container-fluid">
+<br/>
+<div class="col-sm-5">
+<div id="TeamSelectedUIOutputrender" class="shiny-html-output"></div>
+</div>
+<div class="col-sm-7">
+<div id="textrender" class="shiny-text-output"></div>
+</div>
+</div>
+<p>We do everything we did last time, except this time we created the UI element in the server. We use renderUI in the server and assign it to output$UIOutput. We still need to create an ID for selectInput, which we set to “teamSelected.” Also, we required that there is an input for team selected in order to create our text. Later, in the UI we use uiOutput and reference “TeamSelectedUIOutput” to output the UI element we created in the server.</p>
+</div>
+<div id="section-graphs" class="section level2">
+<h2>Graphs:</h2>
+<p>We can also create ggplots in shiny. Using the diamonds data frame from ggplot we can create the following.</p>
+<pre class="r"><code>server &lt;- function(input, output){
+  
+  diamondsFiltered &lt;- reactive({
+    diamonds %&gt;% 
+      filter(carat &gt;= input$Carets[1] &amp; carat &lt;= input$Carets[2])
+  })
+  
+  output$diamondsBar &lt;- renderPlot({
+    ggplot(data=diamondsFiltered(), aes(x=cut)) +
+      geom_bar(fill=&quot;steelblue&quot;) +
+      theme_classic() + labs( x = &quot;Cut&quot;, 
+                              y = &quot;Count&quot;)
+  })
+  
+}
+
+ui &lt;- fluidPage(
+  br(),
+  sliderInput(&quot;Carets&quot;,
+              &quot;Number of Carets in the Diamonds:&quot;,
+              min = 0.3,
+              max = max(diamonds$carat),
+              value = c(1, 3),
+              step = .1),
+  plotOutput(&quot;diamondsBar&quot;)
+)
+
+shinyApp(ui, server)</code></pre>
+<div class="container-fluid">
+<br/>
+<div class="form-group shiny-input-container">
+<label class="control-label" for="Carets">Number of Carets in the Diamonds:</label>
+<input class="js-range-slider" id="Carets" data-type="double" data-min="0.3" data-max="5.01" data-from="1" data-to="3" data-step="0.1" data-grid="true" data-grid-num="9.42" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-drag-interval="true" data-data-type="number"/>
+</div>
+<div id="diamondsBar" class="shiny-plot-output" style="width: 100% ; height: 400px"></div>
+</div>
+<p>So whats is going on above? First, we created a two-way slider, which we reference by calling either input$Carets[1] or [2] depending on which part of the slider we want to reference. Now, we turn to the server. First, we created the object diamondsFiltered, which is reactive based on the slider’s inputs and filters the data frame based on the criteria that the user set. Next, we used renderPlot to create the reactive ggplot. One thing to note is that we set the data in ggplot equal to diamondsFiltered(). This is extremely important anytime we reference a reactive data frame created in the server. If we typed diamondsFiltered, the object would have sent an error. You must add () to the end of any reactive data frame.</p>
+</div>
+<div id="section-putting-all-together" class="section level2">
+<h2>Putting All Together:</h2>
+<p>This example puts together elements that we talked about today, and the code for this example can be found <a href="https://github.com/jjenki22/ShinyWorkshop/blob/main/ShinyMapExample.R">here</a>. This code introduces a few very useful things. First, it uses the library DT, which outputs a data table, which can be used in rmarkdowns as well. The data table is created in the server and outputed in the UI. Second, it utilizes the leaflet package, which is an open-source map system.</p>
+<p>Server:</p>
+<pre class="r"><code>library(shiny)
+library(leaflet)
+library(dplyr)
+library(DT)
+library(stringr)
+
+bballArenas &lt;- read.csv(&quot;https://raw.githubusercontent.com/jjenki22/ShinyWorkshop/main/Data/CollegeBBallArenas.csv&quot;)
+
+server &lt;- function(input, output) {
+  
+  # Filtering based on conferenceInput
+  selectedConf &lt;- reactive({
+    req(input$conferenceInput)
+    bballArenas %&gt;% 
+      filter(CONF == input$conferenceInput)
+  })
+  
+  # Outputting Data Table
+  output$teamsDT &lt;- DT::renderDataTable(DT::datatable({
+    selectedConf()
+    }))
+  
+  # Creating Map Data 
+  arena_data &lt;- reactive({
+    team_arena_data &lt;- selectedConf() %&gt;% 
+      mutate(popup = str_c(str_c(&quot;School: &quot;, Team, sep = &quot;&quot;),
+                           str_c(&quot;Arena: &quot;, Arena, sep = &quot;&quot;),
+                           str_c(&quot;City: &quot;, City, sep = &quot;&quot;),
+                           str_c(&quot;State: &quot;, State, sep = &quot;&quot;),
+                           str_c(&quot;Capacity: &quot;, Capacity, sep = &quot;&quot;),
+                           str_c(&quot;Conference: &quot;, CONF, sep = &quot;&quot;),
+                           sep = &quot;&lt;br/&gt;&quot;))
+    team_arena_data
+  })
+  
+  # Observing showMap Button Input
+  observeEvent(input$showMap, {
+    output$Conf_Map &lt;-renderLeaflet({
+        ncaa_map &lt;- leaflet(arena_data()) %&gt;% 
+          addProviderTiles(&quot;CartoDB.Positron&quot;)  %&gt;% 
+          setView(-98.35, 39.7,
+                  zoom = 4) %&gt;% 
+          addMarkers(~Longitude, ~Latitude,
+                     popup = ~popup)
+        ncaa_map  
+    }) 
+  })
+}
+
+ui &lt;- fluidPage(
+  # Break
+  br(),
+  # Use of FluidRow
+  fluidRow(
+    # Column set to 9
+    column(9, 
+           tags$b(tags$h1(&quot;Locations of College Basketball Arenas&quot;))),
+    # Column set to 3 
+    column(3, 
+           tags$img(src = &quot;ncaa-logo-Floor.jpg&quot;,
+                    height = 55))),
+  # Sidebar layout
+  sidebarLayout(
+    # Sidebar Pannel
+    sidebarPanel(
+      # Input for conference
+      selectInput(&quot;conferenceInput&quot;, # ID
+                  &quot;Select a Conference(s)&quot;, # Label
+                  choices = bballArenas$CONF, # Choices
+                  selectize = TRUE, # Whether Selectize
+                  multiple = TRUE), # Allows multiple selections
+      # Action Button
+      actionButton(&quot;showMap&quot;, # ID
+                   &quot;Show/Update Map&quot;, # Label
+                   class = &quot;btn-primary&quot;), # Class of the Button
+      # Radio Button
+      radioButtons(&quot;displayTable&quot;, # ID
+                   &quot;Do you want to display a table?&quot;, # Label
+                   c(&quot;Yes&quot; = TRUE, &quot;No&quot; = FALSE), # Options
+                   inline = TRUE, # Whether the choices appear on one line
+                   selected = FALSE)), # Selection before user touches the button
+    # Main Pannel
+    mainPanel(
+      # Map Output
+      leafletOutput(&quot;Conf_Map&quot;), # Outputs the leaflet map defined in the server
+      # Break in line
+      br(),
+      # Conditional Pannel
+      conditionalPanel(condition = &quot;input.displayTable == &#39;TRUE&#39;&quot;, # Appears if input$displaytable == TRUE
+                       # Date Table 
+                       DT::dataTableOutput(&quot;teamsDT&quot;)) # Data table output when input$displaytable == TRUE 
+)))
+
+shinyApp(ui, server)</code></pre>
+<div class="container-fluid">
+<br/>
+<div class="row">
+<div class="col-sm-9">
+<b>
+<h1>Locations of College Basketball Arenas</h1>
+</b>
+</div>
+<div class="col-sm-3">
+<img src="www/ncaa-logo-Floor.jpg" height="55"/>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-4">
+<form class="well">
+<div class="form-group shiny-input-container">
+<label class="control-label" for="conferenceInput">Select a Conference(s)</label>
+<div>
+<select id="conferenceInput" multiple="multiple"><option value="Slnd">Slnd</option>
+<option value="MWC">MWC</option>
+<option value="MAC">MAC</option>
+<option value="SEC">SEC</option>
+<option value="SWAC">SWAC</option>
+<option value="SWAC">SWAC</option>
+<option value="AE">AE</option>
+<option value="SWAC">SWAC</option>
+<option value="Pat">Pat</option>
+<option value="SB">SB</option>
+<option value="P12">P12</option>
+<option value="P12">P12</option>
+<option value="SEC">SEC</option>
+<option value="SB">SB</option>
+<option value="SWAC">SWAC</option>
+<option value="SB">SB</option>
+<option value="Pat">Pat</option>
+<option value="SEC">SEC</option>
+<option value="OVC">OVC</option>
+<option value="MAC">MAC</option>
+<option value="B12">B12</option>
+<option value="OVC">OVC</option>
+<option value="MEAC">MEAC</option>
+<option value="AE">AE</option>
+<option value="MWC">MWC</option>
+<option value="ACC">ACC</option>
+<option value="Pat">Pat</option>
+<option value="MAC">MAC</option>
+<option value="MVC">MVC</option>
+<option value="Ivy">Ivy</option>
+<option value="NEC">NEC</option>
+<option value="Pat">Pat</option>
+<option value="MAC">MAC</option>
+<option value="BE">BE</option>
+<option value="WCC">WCC</option>
+<option value="WAC">WAC</option>
+<option value="BW">BW</option>
+<option value="WAC">WAC</option>
+<option value="BW">BW</option>
+<option value="BW">BW</option>
+<option value="P12">P12</option>
+<option value="BSth">BSth</option>
+<option value="MAAC">MAAC</option>
+<option value="Slnd">Slnd</option>
+<option value="NEC">NEC</option>
+<option value="MAC">MAC</option>
+<option value="BSth">BSth</option>
+<option value="CUSA">CUSA</option>
+<option value="SC">SC</option>
+<option value="WAC">WAC</option>
+<option value="Amer">Amer</option>
+<option value="ACC">ACC</option>
+<option value="Horz">Horz</option>
+<option value="SB">SB</option>
+<option value="Pat">Pat</option>
+<option value="CAA">CAA</option>
+<option value="P12">P12</option>
+<option value="MWC">MWC</option>
+<option value="Ivy">Ivy</option>
+<option value="Amer">Amer</option>
+<option value="MEAC">MEAC</option>
+<option value="Ivy">Ivy</option>
+<option value="BE">BE</option>
+<option value="Ivy">Ivy</option>
+<option value="A10">A10</option>
+<option value="A10">A10</option>
+<option value="CAA">CAA</option>
+<option value="MEAC">MEAC</option>
+<option value="Sum">Sum</option>
+<option value="BE">BE</option>
+<option value="Horz">Horz</option>
+<option value="MVC">MVC</option>
+<option value="CAA">CAA</option>
+<option value="ACC">ACC</option>
+<option value="A10">A10</option>
+<option value="Amer">Amer</option>
+<option value="SC">SC</option>
+<option value="OVC">OVC</option>
+<option value="OVC">OVC</option>
+<option value="MAC">MAC</option>
+<option value="BSky">BSky</option>
+<option value="CAA">CAA</option>
+<option value="MVC">MVC</option>
+<option value="MAAC">MAAC</option>
+<option value="NEC">NEC</option>
+<option value="CUSA">CUSA</option>
+<option value="SEC">SEC</option>
+<option value="MEAC">MEAC</option>
+<option value="CUSA">CUSA</option>
+<option value="ASun">ASun</option>
+<option value="ACC">ACC</option>
+<option value="A10">A10</option>
+<option value="Sum">Sum</option>
+<option value="MWC">MWC</option>
+<option value="SC">SC</option>
+<option value="BSth">BSth</option>
+<option value="A10">A10</option>
+<option value="A10">A10</option>
+<option value="BE">BE</option>
+<option value="SEC">SEC</option>
+<option value="SB">SB</option>
+<option value="SB">SB</option>
+<option value="ACC">ACC</option>
+<option value="WCC">WCC</option>
+<option value="SWAC">SWAC</option>
+<option value="WAC">WAC</option>
+<option value="Horz">Horz</option>
+<option value="MEAC">MEAC</option>
+<option value="AE">AE</option>
+<option value="Ivy">Ivy</option>
+<option value="BW">BW</option>
+<option value="BSth">BSth</option>
+<option value="CAA">CAA</option>
+<option value="Pat">Pat</option>
+<option value="Amer">Amer</option>
+<option value="Slnd">Slnd</option>
+<option value="MEAC">MEAC</option>
+<option value="BSky">BSky</option>
+<option value="BSky">BSky</option>
+<option value="B10">B10</option>
+<option value="Horz">Horz</option>
+<option value="MVC">MVC</option>
+<option value="Slnd">Slnd</option>
+<option value="B10">B10</option>
+<option value="MVC">MVC</option>
+<option value="MAAC">MAAC</option>
+<option value="B10">B10</option>
+<option value="B12">B12</option>
+<option value="Sum">Sum</option>
+<option value="Sum">Sum</option>
+<option value="SWAC">SWAC</option>
+<option value="ASun">ASun</option>
+<option value="OVC">OVC</option>
+<option value="CAA">CAA</option>
+<option value="B12">B12</option>
+<option value="B12">B12</option>
+<option value="ASun">ASun</option>
+<option value="MAC">MAC</option>
+<option value="SEC">SEC</option>
+<option value="A10">A10</option>
+<option value="Pat">Pat</option>
+<option value="Slnd">Slnd</option>
+<option value="Pat">Pat</option>
+<option value="BSth">BSth</option>
+<option value="ASun">ASun</option>
+<option value="SB">SB</option>
+<option value="NEC">NEC</option>
+<option value="BW">BW</option>
+<option value="BSth">BSth</option>
+<option value="SB">SB</option>
+<option value="SB">SB</option>
+<option value="CUSA">CUSA</option>
+<option value="ACC">ACC</option>
+<option value="MVC">MVC</option>
+<option value="WCC">WCC</option>
+<option value="Pat">Pat</option>
+<option value="SEC">SEC</option>
+<option value="AE">AE</option>
+<option value="MAAC">MAAC</option>
+<option value="MAAC">MAAC</option>
+<option value="BE">BE</option>
+<option value="CUSA">CUSA</option>
+<option value="B10">B10</option>
+<option value="MEAC">MEAC</option>
+<option value="A10">A10</option>
+<option value="Slnd">Slnd</option>
+<option value="Amer">Amer</option>
+<option value="SC">SC</option>
+<option value="ACC">ACC</option>
+<option value="MAC">MAC</option>
+<option value="B10">B10</option>
+<option value="B10">B10</option>
+<option value="CUSA">CUSA</option>
+<option value="Horz">Horz</option>
+<option value="B10">B10</option>
+<option value="SEC">SEC</option>
+<option value="SEC">SEC</option>
+<option value="SWAC">SWAC</option>
+<option value="SEC">SEC</option>
+<option value="MVC">MVC</option>
+<option value="MAAC">MAAC</option>
+<option value="BSky">BSky</option>
+<option value="BSky">BSky</option>
+<option value="OVC">OVC</option>
+<option value="MEAC">MEAC</option>
+<option value="NEC">NEC</option>
+<option value="OVC">OVC</option>
+<option value="Pat">Pat</option>
+<option value="B10">B10</option>
+<option value="Sum">Sum</option>
+<option value="MWC">MWC</option>
+<option value="AE">AE</option>
+<option value="MWC">MWC</option>
+<option value="WAC">WAC</option>
+<option value="Slnd">Slnd</option>
+<option value="MAAC">MAAC</option>
+<option value="Slnd">Slnd</option>
+<option value="ASun">ASun</option>
+<option value="MEAC">MEAC</option>
+<option value="ASun">ASun</option>
+<option value="ACC">ACC</option>
+<option value="MEAC">MEAC</option>
+<option value="MEAC">MEAC</option>
+<option value="BSky">BSky</option>
+<option value="Sum">Sum</option>
+<option value="ASun">ASun</option>
+<option value="CUSA">CUSA</option>
+<option value="CAA">CAA</option>
+<option value="BSky">BSky</option>
+<option value="BSky">BSky</option>
+<option value="MAC">MAC</option>
+<option value="MVC">MVC</option>
+<option value="Horz">Horz</option>
+<option value="B10">B10</option>
+<option value="Slnd">Slnd</option>
+<option value="ACC">ACC</option>
+<option value="Horz">Horz</option>
+<option value="MAC">MAC</option>
+<option value="B10">B10</option>
+<option value="B12">B12</option>
+<option value="B12">B12</option>
+<option value="CUSA">CUSA</option>
+<option value="Sum">Sum</option>
+<option value="P12">P12</option>
+<option value="P12">P12</option>
+<option value="WCC">WCC</option>
+<option value="Ivy">Ivy</option>
+<option value="B10">B10</option>
+<option value="WCC">WCC</option>
+<option value="ACC">ACC</option>
+<option value="WCC">WCC</option>
+<option value="BSky">BSky</option>
+<option value="SWAC">SWAC</option>
+<option value="BSth">BSth</option>
+<option value="Ivy">Ivy</option>
+<option value="BE">BE</option>
+<option value="B10">B10</option>
+<option value="MAAC">MAAC</option>
+<option value="BSth">BSth</option>
+<option value="A10">A10</option>
+<option value="CUSA">CUSA</option>
+<option value="A10">A10</option>
+<option value="MAAC">MAAC</option>
+<option value="NEC">NEC</option>
+<option value="B10">B10</option>
+<option value="BSky">BSky</option>
+<option value="NEC">NEC</option>
+<option value="A10">A10</option>
+<option value="A10">A10</option>
+<option value="WCC">WCC</option>
+<option value="MAAC">MAAC</option>
+<option value="Slnd">Slnd</option>
+<option value="SC">SC</option>
+<option value="WCC">WCC</option>
+<option value="MWC">MWC</option>
+<option value="WCC">WCC</option>
+<option value="MWC">MWC</option>
+<option value="WCC">WCC</option>
+<option value="MEAC">MEAC</option>
+<option value="WAC">WAC</option>
+<option value="BE">BE</option>
+<option value="MAAC">MAAC</option>
+<option value="OVC">OVC</option>
+<option value="Amer">Amer</option>
+<option value="SB">SB</option>
+<option value="SEC">SEC</option>
+<option value="MEAC">MEAC</option>
+<option value="Sum">Sum</option>
+<option value="Sum">Sum</option>
+<option value="Amer">Amer</option>
+<option value="OVC">OVC</option>
+<option value="Slnd">Slnd</option>
+<option value="SWAC">SWAC</option>
+<option value="MVC">MVC</option>
+<option value="CUSA">CUSA</option>
+<option value="BSky">BSky</option>
+<option value="A10">A10</option>
+<option value="NEC">NEC</option>
+<option value="NEC">NEC</option>
+<option value="BE">BE</option>
+<option value="P12">P12</option>
+<option value="Slnd">Slnd</option>
+<option value="ASun">ASun</option>
+<option value="AE">AE</option>
+<option value="ACC">ACC</option>
+<option value="B12">B12</option>
+<option value="Amer">Amer</option>
+<option value="SEC">SEC</option>
+<option value="OVC">OVC</option>
+<option value="OVC">OVC</option>
+<option value="OVC">OVC</option>
+<option value="B12">B12</option>
+<option value="SEC">SEC</option>
+<option value="Slnd">Slnd</option>
+<option value="SWAC">SWAC</option>
+<option value="SB">SB</option>
+<option value="B12">B12</option>
+<option value="SC">SC</option>
+<option value="MAC">MAC</option>
+<option value="CAA">CAA</option>
+<option value="SB">SB</option>
+<option value="Amer">Amer</option>
+<option value="Amer">Amer</option>
+<option value="CUSA">CUSA</option>
+<option value="BW">BW</option>
+<option value="BW">BW</option>
+<option value="BW">BW</option>
+<option value="BW">BW</option>
+<option value="Amer">Amer</option>
+<option value="P12">P12</option>
+<option value="AE">AE</option>
+<option value="AE">AE</option>
+<option value="WAC">WAC</option>
+<option value="BSth">BSth</option>
+<option value="SC">SC</option>
+<option value="CAA">CAA</option>
+<option value="MWC">MWC</option>
+<option value="P12">P12</option>
+<option value="ASun">ASun</option>
+<option value="SB">SB</option>
+<option value="WAC">WAC</option>
+<option value="P12">P12</option>
+<option value="MWC">MWC</option>
+<option value="WAC">WAC</option>
+<option value="CUSA">CUSA</option>
+<option value="CUSA">CUSA</option>
+<option value="MVC">MVC</option>
+<option value="SEC">SEC</option>
+<option value="A10">A10</option>
+<option value="AE">AE</option>
+<option value="BE">BE</option>
+<option value="ACC">ACC</option>
+<option value="ACC">ACC</option>
+<option value="SC">SC</option>
+<option value="NEC">NEC</option>
+<option value="ACC">ACC</option>
+<option value="P12">P12</option>
+<option value="P12">P12</option>
+<option value="BSky">BSky</option>
+<option value="B12">B12</option>
+<option value="SC">SC</option>
+<option value="Sum">Sum</option>
+<option value="CUSA">CUSA</option>
+<option value="MAC">MAC</option>
+<option value="MVC">MVC</option>
+<option value="CAA">CAA</option>
+<option value="BSth">BSth</option>
+<option value="B10">B10</option>
+<option value="SC">SC</option>
+<option value="Horz">Horz</option>
+<option value="MWC">MWC</option>
+<option value="BE">BE</option>
+<option value="Ivy">Ivy</option>
+<option value="Horz">Horz</option></select>
+<script type="application/json" data-for="conferenceInput">{}</script>
+</div>
+</div>
+<button class="btn btn-default action-button btn-primary" id="showMap" type="button">Show/Update Map</button>
+<div id="displayTable" class="form-group shiny-input-radiogroup shiny-input-container shiny-input-container-inline">
+<label class="control-label" for="displayTable">Do you want to display a table?</label>
+<div class="shiny-options-group">
+<label class="radio-inline">
+<input type="radio" name="displayTable" value="TRUE"/>
+<span>Yes</span>
+</label>
+<label class="radio-inline">
+<input type="radio" name="displayTable" value="FALSE" checked="checked"/>
+<span>No</span>
+</label>
+</div>
+</div>
+</form>
+</div>
+<div class="col-sm-8">
+<div id="Conf_Map" style="width:100%; height:400px; " class="leaflet html-widget html-widget-output"></div>
+<br/>
+<div data-display-if="input.displayTable == &#39;TRUE&#39;" data-ns-prefix="">
+<div id="teamsDT" style="width:100%; height:auto; " class="datatables html-widget html-widget-output"></div>
+</div>
+</div>
+</div>
+</div>
+<p>Overview of server items:</p>
+<ul>
+<li><p>Filtering Based on conferenceInput</p>
+<ul>
+<li><p>req(input$conferenceInput) is used because it requires an input from conferenceInput for selectedConf to run</p></li>
+<li><p>This creates a new data frame that contains the selected conferences. Remember, everything in the server is a function. Anytime you refer to selectedConf, you have to use (), so it would look like selectedConf()</p></li>
+</ul></li>
+<li><p>output$teamsDT</p>
+<ul>
+<li><p>Takes the element selectedConf() and creates a dataatble</p></li>
+<li><p>Remember you have to use () when referring to selectedConf</p></li>
+</ul></li>
+<li><p>Creating Map Data</p>
+<ul>
+<li><p>Anytime you refer to an object defined within the server, you need to use the reactive function.</p></li>
+<li><p>Next, we used str_c from the stringr package to condense element-wise vectors into one character vector</p></li>
+<li><p>This will be used to create the popup for the leaflet map</p></li>
+</ul></li>
+<li><p>Observing showMap Button Input</p>
+<ul>
+<li><p>This utilizes the observeEvent function in shiny that, in this case, is reacts whenever a user presses the show map button (input$showMap)</p></li>
+<li><p>The addProviderTiles sets the background of the map. Leaflet has many options, and you can view other tiles [here](<a href="https://leaflet-extras.github.io/leaflet-providers/preview/" class="uri">https://leaflet-extras.github.io/leaflet-providers/preview/</a>.</p></li>
+<li><p>Set view sets the geocoordinate view of the map. In this case, it is set to the center of the United States.</p></li>
+<li><p>AddMarkers adds the location of the arenas to the map and the popup functionality.</p></li>
+</ul></li>
+</ul>
+<p>UI:</p>
+<p>Overview of ui items:</p>
+<ul>
+<li><p>Use of fluidRow and columns</p>
+<ul>
+<li><p>This created a row in the UI, and the column creates the spacing between the text and the picture</p></li>
+<li><p>The text is created by using tags$h1, which stands for header size 1</p></li>
+<li><p>tags$b makes the text bold</p></li>
+<li><p>The NCAA picture is added by using tags$img and directing the source to the image. You must create a www folder within the project and place all pictures in this folder. Otherwise, the shiny application will not be able to find the image.</p></li>
+</ul></li>
+<li><p>SidebarPanel</p>
+<ul>
+<li>Is extremely useful and relies on two elements sidebarPanel (the shaded area) and mainPanel (where the map and table appear)</li>
+</ul></li>
+<li><p>selectInput</p>
+<ul>
+<li>Creates the dropdown with the conferences</li>
+</ul></li>
+<li><p>actionButton</p>
+<ul>
+<li>Creates the button that users can interact with</li>
+</ul></li>
+<li><p>radioButton</p>
+<ul>
+<li>Used to create option user can select</li>
+</ul></li>
+<li><p>conditionalPanel</p>
+<ul>
+<li>Only appears when the preset condition is met</li>
+</ul></li>
+</ul>
+</div>
+<div id="section-outside-resources" class="section level2">
+<h2>Outside Resources:</h2>
+<ul>
+<li><p><a href="https://shiny.rstudio.com/gallery/">RStudio Shiny Examples</a></p></li>
+<li><p><a href="https://mastering-shiny.org/">Mastering Shiny by Hadley Wickham</a></p></li>
+<li><p><a href="https://shiny.rstudio.com/tutorial/">RStudio Shiny Tutorial</a></p></li>
+<li><p><a href="https://shiny.rstudio.com/articles/">RStudio Shiny Articles</a></p></li>
+<li><p><a href="https://community.rstudio.com/c/shiny/8?_ga=2.212813021.876891639.1603756418-718580365.1572380605">RStudio Shiny Community Page</a></p></li>
+<li><a href="https://rstudio.com/resources/cheatsheets/">Shiny Cheatsheet</a> 
+<script type="application/shiny-prerendered" data-context="server-start">
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+output$text <- renderText({
+  selectedGame <- schedule %>% 
+    filter(Opponent == input$teamSelected)
+  paste("Notre Dame will play ",
+        selectedGame$Opponent,
+        " on ",
+        as.character(selectedGame$Date),
+        " at ",
+        as.character(selectedGame$GameTime),
+        " in ",
+        as.character(selectedGame$Location),
+        ".",
+        sep = "")
+  })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+server <- function(input, output) {
+  
+}
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+output$TeamSelectedUIOutputrender <- renderUI({
+    selectInput("teamSelectedrender",
+                "Select an Opponent:",
+                choices = schedule$Opponent)
+  })
+  
+output$textrender <- renderText({
+  req(input$teamSelectedrender)
+  selectedGame <- schedule %>% 
+    filter(Opponent == input$teamSelected)
+  paste("Notre Dame will play ",
+        selectedGame$Opponent,
+        " on ",
+        as.character(selectedGame$Date),
+        " at ",
+          as.character(selectedGame$GameTime),
+          " in ",
+          as.character(selectedGame$Location),
+          ".",
+          sep = "")
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+diamondsFiltered <- reactive({
+    diamonds %>% 
+      filter(carat >= input$Carets[1] & carat <= input$Carets[2])
+})
+  
+output$diamondsBar <- renderPlot({
+    ggplot(data=diamondsFiltered(), aes(x=cut)) +
+      geom_bar(fill="steelblue") +
+      theme_classic() + labs( x = "Cut", 
+                              y = "Count")
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+selectedConf <- reactive({
+  req(input$conferenceInput)
+  bballArenas %>% 
+    filter(CONF == input$conferenceInput)
+})
+  
+  # Outputting Data Table
+output$teamsDT <- DT::renderDataTable(DT::datatable({
+  selectedConf()
+  }))
+  
+  # Creating Map Data 
+arena_data <- reactive({
+  team_arena_data <- selectedConf() %>% 
+    mutate(popup = str_c(str_c("School: ", Team, sep = ""),
+                         str_c("Arena: ", Arena, sep = ""),
+                         str_c("City: ", City, sep = ""),
+                         str_c("State: ", State, sep = ""),
+                         str_c("Capacity: ", Capacity, sep = ""),
+                         str_c("Conference: ", CONF, sep = ""),
+                         sep = "<br/>"))
+  team_arena_data
+})
+  
+# Observing showMap Button Input
+observeEvent(input$showMap, {
+  output$Conf_Map <-renderLeaflet({
+    ncaa_map <- leaflet(arena_data()) %>% 
+      addProviderTiles("CartoDB.Positron")  %>% 
+      setView(-98.35, 39.7,
+              zoom = 4) %>% 
+      addMarkers(~Longitude, ~Latitude,
+                 popup = ~popup)
+    ncaa_map  
+    }) 
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets"]},{"type":"character","attributes":{},"value":["1.5.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["htmlwidgets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["htmlwidgets"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.5.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.12.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["datatables-css"]},{"type":"character","attributes":{},"value":["0.0.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/css"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["datatables-crosstalk.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["datatables-binding"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["datatables.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["dt-core"]},{"type":"character","attributes":{},"value":["1.10.19"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/datatables"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/jquery.dataTables.min.js"]},{"type":"character","attributes":{},"value":["css/jquery.dataTables.min.css","css/jquery.dataTables.extra.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["crosstalk"]},{"type":"character","attributes":{},"value":["1.0.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/crosstalk.min.js"]},{"type":"character","attributes":{},"value":["css/crosstalk.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["crosstalk"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.0.0"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["selectize"]},{"type":"character","attributes":{},"value":["0.11.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/selectize"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/selectize.bootstrap3.css"]},{"type":"character","attributes":{},"value":["<!--[if lt IE 9]>\n<script src=\"shared/selectize/js/es5-shim.min.js\"><\/script>\n<![endif]-->\n<script src=\"shared/selectize/js/selectize.min.js\"><\/script>"]},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["selectize"]},{"type":"character","attributes":{},"value":["0.11.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/selectize"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/selectize.bootstrap3.css"]},{"type":"character","attributes":{},"value":["<!--[if lt IE 9]>\n<script src=\"shared/selectize/js/es5-shim.min.js\"><\/script>\n<![endif]-->\n<script src=\"shared/selectize/js/selectize.min.js\"><\/script>"]},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider"]},{"type":"character","attributes":{},"value":["2.1.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css","css/ion.rangeSlider.skinShiny.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap-datepicker"]},{"type":"character","attributes":{},"value":["1.6.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/datepicker"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/bootstrap-datepicker.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap-datepicker3.min.css"]},{"type":"character","attributes":{},"value":["<script>\n(function() {\n  var datepicker = $.fn.datepicker.noConflict();\n  $.fn.bsDatepicker = datepicker;\n})();\n<\/script>"]},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.7"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href","file"]}},"value":[{"type":"character","attributes":{},"value":["shared/bootstrap"]},{"type":"character","attributes":{},"value":["www/shared/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.3.2"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider"]},{"type":"character","attributes":{},"value":["2.1.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css","css/ion.rangeSlider.skinShiny.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.7"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href","file"]}},"value":[{"type":"character","attributes":{},"value":["shared/bootstrap"]},{"type":"character","attributes":{},"value":["www/shared/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.3.2"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["selectize"]},{"type":"character","attributes":{},"value":["0.11.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/selectize"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/selectize.bootstrap3.css"]},{"type":"character","attributes":{},"value":["<!--[if lt IE 9]>\n<script src=\"shared/selectize/js/es5-shim.min.js\"><\/script>\n<![endif]-->\n<script src=\"shared/selectize/js/selectize.min.js\"><\/script>"]},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets"]},{"type":"character","attributes":{},"value":["1.5.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["htmlwidgets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["htmlwidgets"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.5.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.12.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["leaflet"]},{"type":"character","attributes":{},"value":["1.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/leaflet"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet.js"]},{"type":"character","attributes":{},"value":["leaflet.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["leafletfix"]},{"type":"character","attributes":{},"value":["1.0.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/leafletfix"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leafletfix.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["Proj4Leaflet"]},{"type":"character","attributes":{},"value":["1.0.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/plugins/Proj4Leaflet"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["proj4-compressed.js","proj4leaflet.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["rstudio_leaflet"]},{"type":"character","attributes":{},"value":["1.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/lib/rstudio_leaflet"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rstudio_leaflet.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["leaflet-binding"]},{"type":"character","attributes":{},"value":["2.0.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["leaflet"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["2.0.3"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["datatables-css"]},{"type":"character","attributes":{},"value":["0.0.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets/css"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["datatables-crosstalk.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["datatables-binding"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["htmlwidgets"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["datatables.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["DT"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.9"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["crosstalk"]},{"type":"character","attributes":{},"value":["1.0.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/crosstalk.min.js"]},{"type":"character","attributes":{},"value":["css/crosstalk.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["crosstalk"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.0.0"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.7"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href","file"]}},"value":[{"type":"character","attributes":{},"value":["shared/bootstrap"]},{"type":"character","attributes":{},"value":["www/shared/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.3.2"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53]}},"value":[{"type":"character","attributes":{},"value":["base","colorspace","compiler","crayon","crosstalk","data.table","datasets","digest","dplyr","DT","ellipsis","evaluate","generics","ggplot2","glue","graphics","grDevices","grid","gtable","htmltools","htmlwidgets","httpuv","jsonlite","knitr","later","leaflet","lifecycle","magrittr","methods","mime","munsell","pillar","pkgconfig","promises","purrr","R6","Rcpp","rlang","rmarkdown","scales","shiny","stats","stringi","stringr","tibble","tidyselect","tools","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["3.6.1","1.4-1","3.6.1","1.3.4","1.0.0","1.13.2","3.6.1","0.6.25","1.0.2","0.9","0.3.1","0.14","0.0.2","3.3.2","1.4.2","3.6.1","3.6.1","3.6.1","0.3.0","0.5.0","1.5.1","1.5.1","1.7.1","1.29","0.8.0","2.0.3","0.2.0","1.5","3.6.1","0.9","0.5.0","1.4.6","2.0.3","1.0.1","0.3.4","2.4.1","1.0.5","0.4.7","2.1","1.1.1","1.3.2","3.6.1","1.4.6","1.4.0","3.0.3","1.1.0","3.6.1","3.6.1","0.3.4","2.2.0","0.16","1.8-4","2.2.1"]}]}]}
+</script>
+<!--/html_preserve--></li>
+</ul>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
