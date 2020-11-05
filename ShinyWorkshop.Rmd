@@ -14,7 +14,30 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 Shiny is a package in R that provides the ability to combine your analytical work with an interactive web application. You can create applications that run locally on your computer or on the web using services such as [AWS](https://www.charlesbordet.com/en/guide-shiny-aws/#) to deploy your app on the web. The great thing about Shiny is that you do not have to write any CSS, HTML, or JavaScript.
 
-Shiny applications have two defining elements a ui and server. The server is a function that interacts with the ui in continuum as long as the application is running. These two elements are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter the server's elements. The basic flow of a Shiny application is as follows:
+### Hosting on shinyapps.io
+
+1.    Start by going to <a href="https://www.shinyapps.io/admin/#/login">shinyapp.io</a> and create an account. 
+
+2.    After you get your account up and running, you will need to get your token and secret (isn't as cool as it sounds). Click on your username and then "Tokens". After you add a token, you should have some code that looks like this:
+
+```{r, eval = FALSE}
+rsconnect::setAccountInfo(name='saberry',
+			  token='78E99845F537740BAC221F1A2E7',
+			  secret='pV/eAxst5Jflx03d74VsSAriz/EMuVk')
+```
+
+Naturally, you will need to install the `rsconnect` package before running the line above.
+
+After that, you can copy our `shinyPrediction` folder and then pass this along:
+
+```{r, eval = FALSE}
+rsconnect::deployApp("~/path/to/shinyPrediction/")
+```
+
+
+### What Makes a Shiny App
+
+Shiny applications have two defining elements: a ui and server. The server is a function that interacts with the ui in continuum as long as the application is running. These two elements are combined and run in the R script by running the command shinyApp(ui, server). When the application is running, the user can change inputs in the ui that will alter the server's elements. The basic flow of a Shiny application is as follows:
 
 ```{r eval = F, echo = T}
 library(shiny)
