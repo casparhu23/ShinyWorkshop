@@ -350,7 +350,7 @@ output$TeamSelectedUIOutputrender <- renderUI({
 output$textrender <- renderText({
   req(input$teamSelectedrender)
   selectedGame <- schedule %>% 
-    filter(Opponent == input$teamSelected)
+    filter(Opponent == input$teamSelectedrender)
   paste("Notre Dame will play ",
         selectedGame$Opponent,
         " on ",
